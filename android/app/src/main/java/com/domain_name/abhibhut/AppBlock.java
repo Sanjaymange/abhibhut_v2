@@ -1,0 +1,44 @@
+package com.domain_name.abhibhut;
+
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.Activity;
+import android.content.Intent;
+import android.view.accessibility.AccessibilityEvent;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class AppBlock extends Activity {
+
+    public void blockAppUsage() {
+        // Disable the launch of the blocked app
+        disableAppLaunch();
+        // show a message to the user , change toast.length_long parameter to change time
+        Toast.makeText(this, "Distracting app usage blocked", Toast.LENGTH_LONG).show();
+        /*To provide service for Image and Audio , we need to save URL of those media in sql
+        * as accessibility runs in background , so it will not have any objects which will provide url and
+        * also we cannot save too much of url data on shared preference for optomised performance */
+
+        /*if(packageNamesMap.get("Block_MSG") != null)
+        {
+            Toast.makeText(this, packageNamesMap.get("Block_MSG"), Toast.LENGTH_LONG).show();
+        }
+        else if(packageNamesMap.get("IMG_MSG_URI") != null)
+        {
+            ImageViewer img= new ImageViewer(packageNamesMap.get("IMG_MSG_URI"));
+        }
+        else if(packageNamesMap.get("Audio_MSG_URI") != null)
+        {
+            /*Audio player class is generated , but its layout is not ready yet
+        } */
+    }
+    public void disableAppLaunch() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+}
