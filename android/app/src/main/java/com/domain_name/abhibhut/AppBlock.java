@@ -18,9 +18,11 @@ public class AppBlock extends Activity {
         disableAppLaunch();
         // show a message to the user , change toast.length_long parameter to change time
         Toast.makeText(this, "Distracting app usage blocked", Toast.LENGTH_LONG).show();
-        /*To provide service for Image and Audio , we need to save URL of those media in sql
-        * as accessibility runs in background , so it will not have any objects which will provide url and
-        * also we cannot save too much of url data on shared preference for optomised performance */
+
+        /*Each app will have a shared preference created as com.abhibhut.label_name
+        * this shared preference will have url and media type response metadata in it */
+
+        /**/
 
         /*if(packageNamesMap.get("Block_MSG") != null)
         {

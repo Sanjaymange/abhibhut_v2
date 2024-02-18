@@ -40,6 +40,7 @@ public class AccessibilityUtil extends AccessibilityService {
                 new AppBlock().blockAppUsage();
             }
             if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+
                 CharSequence text = (CharSequence) event.getText();
 
                 if (text != null && PornBlock.containsPornographicContent(text.toString())) {
@@ -89,7 +90,6 @@ public class AccessibilityUtil extends AccessibilityService {
     public void addPackageNameDynamically(String[] packageName) {
         AccessibilityServiceInfo info = getServiceInfo();
         String[] existingPackageNames = info.packageNames;
-
         // Create a new array with the additional package name
         String[] newPackageNames = new String[existingPackageNames.length + packageName.length];
         System.arraycopy(existingPackageNames, 0, newPackageNames, 0, existingPackageNames.length);
@@ -127,7 +127,7 @@ public class AccessibilityUtil extends AccessibilityService {
     @Override
     public void onInterrupt() {
         /* Add a logic to raise an alert every 7 seconds if accessibility service is turned off , turn on abhibhut app
-         * and show intent which navigates to Accessibility service Setting page (Use openAccessibilitySettings methos in
+         * and show intent which navigates to Accessibility service Setting page (Use openAccessibilitySettings method in
          * AccessibilityUtil.java class . This should be only done for those
          * users who have apps which should be blocked */
     }

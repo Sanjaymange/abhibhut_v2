@@ -140,6 +140,9 @@ public class AppData {
         Gson gson = new Gson();
         String json = gson.toJson(new_pref);
         editor.putString("blocked_pkg", json);
+        /*next value is the sequence counter to generate a new key value to pass as an id to AlarmManager*/
+        //int new_val = preferences.getInt("next_val",0) + 1;
+        //editor.putInt("next_val",new_val);
         editor.apply();
     }
 

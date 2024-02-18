@@ -1,15 +1,10 @@
+import 'package:abhibhut_v2/utils/user_profile_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:abhibhut_v2/utils/Routes.dart';
 
 class NameInputPage extends StatelessWidget {
   final TextEditingController _nameController = TextEditingController();
-
-  void update_user_profile_shared_preference(String username) async {
-    SharedPreferences pref = await getSharedPreference();
-    await pref.setString('User_name', username);
-    print('Username from shared preference: ${pref.getString('User_name')}');
-  }
 
   Future<SharedPreferences> getSharedPreference() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -45,7 +40,8 @@ class NameInputPage extends StatelessWidget {
                   String enteredName = _nameController.text;
 
                   if (enteredName.trim().isNotEmpty) {
-                    update_user_profile_shared_preference(enteredName);
+                    /* Adding username in shared preference */
+                    User_profile_utils.set_user_name(enteredName);
                     Navigator.pushNamed(context, App_Routes.HomeScreen);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
