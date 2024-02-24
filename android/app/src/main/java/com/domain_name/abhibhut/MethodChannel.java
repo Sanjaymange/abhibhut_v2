@@ -1,5 +1,6 @@
 package com.domain_name.abhibhut;
 import android.content.Context;
+import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 
@@ -57,20 +58,21 @@ public class MethodChannel extends FlutterActivity{
                                 AccessibilityUtil util = new AccessibilityUtil();
                                 List<String> block_packages = call.argument("PackageNames");
                                 util.addPackageNameDynamically(block_packages.toArray(new String[0]));
-                                AppData.update_master_shared_preference(context,AppData.read_pref(context));
-                                /*This will update json in master shared preference , this is required because we take all
-                                 * blocked apps named from shared preference , to show user blocked apps in AppLIST*/
-                                AppData.update_master_shared_preference(context,AppData.read_pref(context));
-                                /*Insert what type of Intent it wants during blocking an app , additional metadata like
-                                * block interval and media url*/
-                                /*This method is not tested yet , hence all the fields are inserted as null*/
-                                AppData.update_app_shared_preference(null,null,0,0,null);
+                                // Update sql table
                             }
                             if(call.method.equals("disable_app_lock"))
                             {
                                 List<String> unblock_packages = call.argument("PackageNames");
                                 AccessibilityUtil util = new AccessibilityUtil();
                                 util.removePackageNameDynamically(unblock_packages);
+                            }
+                            if(call.method.equals("get_icon"))
+                            {
+                                Context context = getApplicationContext();
+                                PackageManager mgr = context.getPackageManager();
+                                String pkg_nm = call.argument("package_nm");
+                                byte[] icon = AppData.get_icon(mgr,pkg_nm);
+                                result.success(icon);
                             }
                         });
     }

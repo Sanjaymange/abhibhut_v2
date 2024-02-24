@@ -4,13 +4,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.abhibhut.Utils.SqlUtils;
+
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
@@ -21,6 +23,14 @@ import java.util.Map;
 
 public class AppData {
 
+    Context context;
+
+    public AppData(Context context)
+    {
+        this.context = context;
+    }
+
+    /*rename this file with the default file name of shared preference*/
     static final String PREF_FILE_NAME = "com.abhibhut.blocked_apps";
     public static List<Map<String, Object>> InstalledAppList(Context context) {
 
@@ -30,9 +40,7 @@ public class AppData {
 
         List<ApplicationInfo> appinfo = get_user_installed_apps(pkg_mgr);
 
-        ArrayList<Map<String,String>> read_pref = read_pref(context);
-
-        List<String> blocked_pkg = getBlockedPkgs(read_pref);
+        Map<String , Object> blocked_pkgs = getBlockedPkgs(context);
 
         for(ApplicationInfo appInfo : appinfo)
         {
@@ -40,22 +48,21 @@ public class AppData {
 
             String package_nm = appInfo.packageName;
                 app_data.put("app_name",pkg_mgr.getApplicationLabel(appInfo));
-                app_data.put("icon", get_icon(appInfo,pkg_mgr));
+                app_data.put("icon", get_icon(pkg_mgr,package_nm));
+                app_data.put("package_name",package_nm);
+
 
                 /*Checking is app is blocked*/
-                if (!read_pref.get(0).containsKey("No_blocked_apps")) {
-                    if (blocked_pkg.contains(package_nm)) {
-                        for (Map<String, String> blockedApp : read_pref) {
-                            String blocked_pkg_nm = blockedApp.get("package_name");
-                            if (blocked_pkg_nm.equals(package_nm)) {
-                                app_data.put("blocked_app", "Y");
-                                app_data.put("start_time", blockedApp.get("start_time"));
-                                app_data.put("end_time", blockedApp.get("end_time"));
-                            }
-                        }
+                    if (blocked_pkgs.containsKey(package_nm)) {
+                        List<Integer> times = (List<Integer>) blocked_pkgs.get(package_nm);
+                        app_data.put("blocked_app", "Y");
+                        app_data.put("start_time", times.get(0));
+                        app_data.put("end_time", times.get(1));
                     }
-                }
                 else {
+                    app_data.put("blocked_app", "N");
+                    app_data.put("start_time", null);
+                    app_data.put("end_time", null);
                     appList.add(app_data);
                 }
             }
@@ -80,8 +87,34 @@ public class AppData {
         }
         return user_installed;
     }
-    public static byte[] get_icon(ApplicationInfo appInfo, PackageManager pkgMgr) {
-        Drawable appIcon = appInfo.loadIcon(pkgMgr);
+
+    public static Map<String , Object> getBlockedPkgs(Context context)
+    {
+        Map<String , Object> blocked_apps = new HashMap<>();
+        SqlUtils dbHelper = SqlUtils.getInstance(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        String[] selectionArgs = {"Y"};
+        Cursor data = db.rawQuery("SELECT PACKAGE_NM , BLOCKED , START_TIME , END_TIME FROM APP_DATA WHERE BLOCKED = ?",selectionArgs);
+        while(data.moveToNext())
+        {
+            List<Integer> times = new ArrayList<>();
+            String package_name = data.getString(0);
+            //start_time
+            times.add(data.getInt(1));
+            //end_time
+            times.add(data.getInt(2));
+            blocked_apps.put(package_name,times);
+        }
+        return blocked_apps;
+    }
+
+    public static byte[] get_icon(PackageManager pkg_mgr , String Pkg_nm) {
+        Drawable appIcon = null;
+        try {
+            appIcon = pkg_mgr.getApplicationIcon(Pkg_nm);
+        } catch (PackageManager.NameNotFoundException e) {
+                return new byte[0];
+        }
         Bitmap appIconBitmap;
         if (appIcon instanceof BitmapDrawable) {
             appIconBitmap = ((BitmapDrawable) appIcon).getBitmap();
@@ -96,65 +129,5 @@ public class AppData {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         appIconBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
-    }
-
-
-    public static ArrayList<Map<String,String>> read_pref(Context context)
-    {
-        ArrayList<Map<String,String>> read_pref = new ArrayList<>();
-        SharedPreferences pref = context.getSharedPreferences(PREF_FILE_NAME,Context.MODE_PRIVATE);
-        String pkg_json = pref.getString("blocked_pkg",null);
-        if(pkg_json==null)
-        {
-            Map<String, String> noBlockedApps = new HashMap<>();
-            noBlockedApps.put("No_blocked_apps"," ");
-            read_pref.add(noBlockedApps);
-            return read_pref;
-        }
-        Gson gson = new Gson();
-        Type type = new TypeToken<ArrayList<Map<String,String>>>() {}.getType();
-        read_pref = gson.fromJson(pkg_json,type);
-        return read_pref;
-    }
-
-    /* This function is used as we need a list to iterate and compare all the installed
-    * pkgs with blocked_pkgs */
-   public static List<String> getBlockedPkgs(ArrayList<Map<String,String>> read_pref)
-    {
-        List<String> blocked_pkgs = new ArrayList<>();
-        for (Map<String, String> blockedPackage : read_pref)
-        {
-            String package_nm = blockedPackage.get("package_name");
-            blocked_pkgs.add(package_nm);
-        }
-        return blocked_pkgs;
-    }
-
-    /*This method will be used to update main shared preference*/
-
-    public static void update_master_shared_preference(Context context, ArrayList<Map<String,String>> new_pref) {
-        SharedPreferences preferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        /*First we need to remove package before re-inserting new package*/
-        editor.clear();
-        Gson gson = new Gson();
-        String json = gson.toJson(new_pref);
-        editor.putString("blocked_pkg", json);
-        /*next value is the sequence counter to generate a new key value to pass as an id to AlarmManager*/
-        //int new_val = preferences.getInt("next_val",0) + 1;
-        //editor.putInt("next_val",new_val);
-        editor.apply();
-    }
-
-    /*This method will be used to update app level shared preference */
-    public static void update_app_shared_preference(Context context ,String file_nm , int start_time , int end_time , String Url)
-    {
-        SharedPreferences preferences = context.getSharedPreferences(file_nm, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.clear();
-        editor.putInt("start_time",start_time);
-        editor.putInt("end_time",start_time);
-        editor.putString("Url",Url);
-        editor.apply();
     }
 }

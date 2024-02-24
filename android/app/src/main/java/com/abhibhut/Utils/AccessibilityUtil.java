@@ -15,6 +15,7 @@ import com.domain_name.abhibhut.PornBlock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /* This is now become a driver class to perform activities in AppBlock and PornBlock */
 public class AccessibilityUtil extends AccessibilityService {
@@ -35,8 +36,8 @@ public class AccessibilityUtil extends AccessibilityService {
          * to block it */
 
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            List<String> blocked_pkg = AppData.getBlockedPkgs(AppData.read_pref(getApplicationContext()));
-            if(blocked_pkg.contains(pkg_nm)) {
+            Map<String , Object> blocked_pkgs = AppData.getBlockedPkgs(getApplicationContext());
+            if(blocked_pkgs.containsKey(pkg_nm)) {
                 new AppBlock().blockAppUsage();
             }
             if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {

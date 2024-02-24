@@ -5,7 +5,11 @@ plugins {
 }
 
 dependencies {
-    implementation 'com.google.code.gson:gson:2.8.7'
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
+            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+        }
+    }
 }
 
 def localProperties = new Properties()

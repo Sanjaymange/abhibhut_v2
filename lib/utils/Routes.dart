@@ -1,6 +1,5 @@
 class App_Routes {
   static const String AppHandler = '/';
-  static const String AppList = '/AppList';
-  static const String FirstRun = '/FirstRun';
-  static const String HomeScreen = '/HomeScreen';
+  static const String AppList = '/Screens/AppList';
+  static const String HomeScreen = '/Screens/HomeScreen';
 }

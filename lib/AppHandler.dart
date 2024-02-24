@@ -52,7 +52,6 @@ class _AppHandlerState extends State<AppHandler> {
         },
       ),
       routes: {
-        App_Routes.FirstRun: (context) => FirstRun(),
         App_Routes.AppList: (context) => AppList(),
         App_Routes.HomeScreen: (context) => HomeScreen()
       },
