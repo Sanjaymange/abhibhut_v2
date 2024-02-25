@@ -30,13 +30,7 @@ class _FirstRunState extends State<FirstRun>
       for (var app in appdata) {
         await db.InsertData(
             "INSERT INTO APP_DATA (APP_LABEL,PACKAGE_NM,BLOCKED,START_TIME,END_TIME) VALUES (?,?,?,?,?)",
-            [
-              app['app_name'],
-              app['package_name'],
-              app['blocked_app'],
-              app['start_time'],
-              app['end_time']
-            ]);
+            [app['app_name'], app['package_name']]);
       }
     });
   }

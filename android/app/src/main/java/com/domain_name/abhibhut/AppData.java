@@ -55,12 +55,13 @@ public class AppData {
                 /*Checking is app is blocked*/
                     if (blocked_pkgs.containsKey(package_nm)) {
                         List<Integer> times = (List<Integer>) blocked_pkgs.get(package_nm);
-                        app_data.put("blocked_app", "Y");
+                        app_data.put("blocked_app", true);
                         app_data.put("start_time", times.get(0));
                         app_data.put("end_time", times.get(1));
+                        app_data.put("app_id",blocked_pkgs.get("app_id"));
                     }
                 else {
-                    app_data.put("blocked_app", "N");
+                    app_data.put("blocked_app", false);
                     app_data.put("start_time", null);
                     app_data.put("end_time", null);
                     appList.add(app_data);
@@ -93,16 +94,17 @@ public class AppData {
         Map<String , Object> blocked_apps = new HashMap<>();
         SqlUtils dbHelper = SqlUtils.getInstance(context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        String[] selectionArgs = {"Y"};
-        Cursor data = db.rawQuery("SELECT PACKAGE_NM , BLOCKED , START_TIME , END_TIME FROM APP_DATA WHERE BLOCKED = ?",selectionArgs);
+        String[] selectionArgs = {"true"};
+        Cursor data = db.rawQuery("SELECT APP_ID, PACKAGE_NM , START_TIME , END_TIME FROM APP_DATA WHERE BLOCKED = ?",selectionArgs);
         while(data.moveToNext())
         {
+            blocked_apps.put("app_id",data.getInt(0));
             List<Integer> times = new ArrayList<>();
-            String package_name = data.getString(0);
+            String package_name = data.getString(1);
             //start_time
-            times.add(data.getInt(1));
-            //end_time
             times.add(data.getInt(2));
+            //end_time
+            times.add(data.getInt(3));
             blocked_apps.put(package_name,times);
         }
         return blocked_apps;
