@@ -1,12 +1,11 @@
 import 'package:abhibhut_v2/DataObjects/AppData.dart';
-import 'package:abhibhut_v2/Widgets/EnableAccessibilityDialogue.dart';
 import 'package:abhibhut_v2/Widgets/EnablePremiumDialogue.dart';
 import 'package:abhibhut_v2/utils/App_block_utils.dart';
 import 'package:abhibhut_v2/utils/Common_utils.dart';
 import 'package:abhibhut_v2/utils/Porn_block_utils.dart';
 import 'package:abhibhut_v2/utils/Routes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:usage_stats/usage_stats.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,21 +21,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     AppData.load_all_AppList().then((value) => setState(() {
           all_apps_loaded = true;
         }));
-    WidgetsFlutterBinding.ensureInitialized();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: all_apps_loaded
-            ?
-            // Show loading indicator while loading data
-            Center(
+            ? Center(
                 child: Column(
                 children: [
                   SizedBox(
@@ -54,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         bool accessibility_enabled =
                             await CommonUtils.IsAccessibilityEnabled();
                         if (accessibility_enabled) {
-                          EnableAccessibilityDialogue();
+                          //EnableAccessibilityDialogue();
                         } else {
                           Porn_block_utils.porn_block();
                         }
@@ -78,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         bool accessibility_enabled =
                             await CommonUtils.IsAccessibilityEnabled();
                         if (accessibility_enabled) {
-                          EnableAccessibilityDialogue();
+                          //EnableAccessibilityDialogue();
                         } else {
                           AppBlockUtils().block_app(["com.android.youtube"]);
                         }
@@ -101,6 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ))
-            : Center(child: CircularProgressIndicator()));
+            : Center(child: Text('Hold on checking stats permission...')));
   }
 }

@@ -107,6 +107,7 @@ public class AppData {
             times.add(data.getInt(3));
             blocked_apps.put(package_name,times);
         }
+        data.close();
         return blocked_apps;
     }
 

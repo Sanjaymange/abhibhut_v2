@@ -1,15 +1,8 @@
 package com.domain_name.abhibhut;
 
-import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;
 import android.content.Intent;
-import android.view.accessibility.AccessibilityEvent;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class AppBlock extends Activity {
 

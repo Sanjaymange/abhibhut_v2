@@ -1,5 +1,7 @@
 package com.domain_name.abhibhut;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
@@ -73,6 +75,17 @@ public class MethodChannel extends FlutterActivity{
                                 String pkg_nm = call.argument("package_nm");
                                 byte[] icon = AppData.get_icon(mgr,pkg_nm);
                                 result.success(icon);
+                            }
+                            if(call.method.equals("usage_stats_permission"))
+                            {
+                                Intent intent = new Intent(this, usage_access.class);
+                                try {
+                                    startActivity(intent);
+                                } catch (Exception e) {
+                                    // Handle the case where the activity couldn't be found
+                                    System.out.println(e.getMessage());
+                                    // Show a message to the user or provide an alternative option
+                                }
                             }
                         });
     }

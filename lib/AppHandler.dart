@@ -1,9 +1,11 @@
 import 'package:abhibhut_v2/Screens/AppList.dart';
 import 'package:abhibhut_v2/Screens/First_run.dart';
 import 'package:abhibhut_v2/Screens/Home_Screen.dart';
+import 'package:abhibhut_v2/Widgets/EnableUsageAccessDialogue.dart';
 import 'package:flutter/material.dart';
 import 'utils/Routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:usage_stats/usage_stats.dart';
 
 class AppHandler extends StatefulWidget {
   const AppHandler({super.key});
@@ -27,33 +29,57 @@ class _AppHandlerState extends State<AppHandler> {
     }
   }
 
+  Future<bool?> check_usage_permission(BuildContext context) async {
+    bool? usage_accessible = await UsageStats.checkUsagePermission();
+    print(usage_accessible);
+    return usage_accessible;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsFlutterBinding.ensureInitialized();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: FutureBuilder<bool>(
-        future: checkFirstRun(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // While checking the first run status, display a loading indicator
-            return Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          } else {
-            // If the app is running for the first time, navigate to the FirstRunPage
-            // Otherwise, navigate to the HomePage
-            if (snapshot.data == true) {
-              return FirstRun();
+          future: checkFirstRun(),
+          builder: (context, firstRunSnapshot) {
+            if (firstRunSnapshot.connectionState == ConnectionState.done) {
+              final isFirstRun = firstRunSnapshot.data;
+              if (isFirstRun == true) {
+                return FirstRun();
+              } else {
+                return FutureBuilder<bool?>(
+                    future: check_usage_permission(context),
+                    builder: (context, usagePermissionSnapshot) {
+                      if (usagePermissionSnapshot.connectionState ==
+                          ConnectionState.done) {
+                        final usageAccessible = usagePermissionSnapshot.data;
+                        if (usageAccessible == false) {
+                          return EnableUsageAccessDialogue();
+                        } else {
+                          return HomeScreen();
+                        }
+                      } else {
+                        // Second future still executing, return a placeholder or empty container
+                        return SizedBox();
+                      }
+                    });
+                //return HomeScreen();
+              }
             } else {
-              return HomeScreen();
+              // this is like a temp placeholder , as
+              return SizedBox();
             }
-          }
-        },
-      ),
+          }),
       routes: {
         App_Routes.AppList: (context) => AppList(),
-        App_Routes.HomeScreen: (context) => HomeScreen()
+        App_Routes.HomeScreen: (context) => HomeScreen(),
+        App_Routes.EnableUsageAccessDialogue: (context) =>
+            EnableUsageAccessDialogue(),
       },
     );
   }
