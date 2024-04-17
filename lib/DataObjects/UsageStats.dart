@@ -2,18 +2,24 @@ import 'package:abhibhut_v2/utils/SqlHelper.dart';
 
 class UsageStats {
   int? appId;
-  int? weekly_Usage;
-  int? monthly_Usage;
-  int? Weekly_saved_hours;
-  int? Monthly_saved_hours;
-  int? average_Usage_weekly;
-  int? average_Usage_monthly;
-  int? weekly_blocked_times;
-  int? monthly_blocked_times;
+  //int? weekly_Usage;
+  //int? monthly_Usage;
+  int? Usage;
+  //int? Weekly_saved_hours;
+  //int? Monthly_saved_hours;
+  int? saved_hours;
+  //int? average_Usage_weekly;
+  //int? average_Usage_monthly;
+  int? average_Usage;
+  //int? weekly_blocked_times;
+  //int? monthly_blocked_times;
+  int? blocked_times;
+  
+  String? tenure;
 
   final DatabaseHelper db = DatabaseHelper();
 
-  UsageStats({
+  /*UsageStats({
     this.appId,
     this.weekly_Usage,
     this.monthly_Usage,
@@ -23,9 +29,17 @@ class UsageStats {
     this.average_Usage_monthly,
     this.weekly_blocked_times,
     this.monthly_blocked_times,
-  });
+  });*/
 
-  factory UsageStats.fromDB(Map<String, dynamic> json) {
+  UsageStats(
+      {this.appId,
+      this.Usage,
+      int? saved_hours,
+      int? average_Usage,
+      int? blocked_times,
+      String? tenure});
+
+  /*factory UsageStats.fromDB(Map<String, dynamic> json) {
     return UsageStats(
       appId: json["app_id"],
       weekly_Usage: json["weekly_usage"],
@@ -37,8 +51,36 @@ class UsageStats {
       weekly_blocked_times: json["weekly_blocked_times"],
       monthly_blocked_times: json["monthly_blocked_times"],
     );
+  }*/
+
+  factory UsageStats.fromDB(Map<String, dynamic> json, String tenure) {
+  switch (tenure) {
+    case 'weekly': 
+    return UsageStats(
+      appId: json["app_id"],
+      Usage: json["weekly_usage"],
+      saved_hours: json["weekly_saved_hours"],
+      average_Usage: json["average_usage_weekly"],
+      blocked_times: json["weekly_blocked_times"],
+    );
+    case 'monthly': 
+    return UsageStats(
+      appId: json["app_id"],
+      Usage: json["monthly_usage"],
+      saved_hours: json["monthly_saved_hours"],
+      average_Usage: json["average_usage_monthly"],
+      blocked_times: json["monthly_blocked_times"],
+    );
+    default:
+    return UsageStats();
+  }
+  // Handle other cases if necessary
+}
+
+    // Handle other tenures if needed
   }
 
+  /** We have different columns for Monthly , Weekly ; hence we are having all those attributes */
   Future<List<UsageStats>> load_usage_stats([int? tenure]) async {
     List<UsageStats> usageStatsList = [];
     List<Map<String, dynamic>> data = [];
@@ -50,6 +92,12 @@ class UsageStats {
     // At night 3 am there will be a back_up stats to update total counts in the table for today's usage stats
     // same for monthly usage stats
 
+    if (tenure == 1) {
+      data = await db.queryData(
+          '''SELECT TOP 5 AD.PACKAGE_NM , WEEKLY_USGAE , WEEKLY_SAVED_HOURS , AVERAGE_USAGE_WEEKLY  FROM USAGE_STATS UTS 
+      INNER JOIN APP_DATA AD ON UTS.APP_ID = AD.APP_ID
+      ORDER BY WEEKLY_USGAE DESC''');
+    }
     /* One week's usage stats */
     if (tenure == 1) {
       data = await db.queryData(

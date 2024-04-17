@@ -1,11 +1,11 @@
 import 'package:abhibhut_v2/DataObjects/AppData.dart';
+import 'package:abhibhut_v2/Widgets/BargraphWidget.dart';
 import 'package:abhibhut_v2/Widgets/EnablePremiumDialogue.dart';
 import 'package:abhibhut_v2/utils/App_block_utils.dart';
 import 'package:abhibhut_v2/utils/Common_utils.dart';
 import 'package:abhibhut_v2/utils/Porn_block_utils.dart';
 import 'package:abhibhut_v2/utils/Routes.dart';
 import 'package:flutter/material.dart';
-import 'package:usage_stats/usage_stats.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,7 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Text("Daily usage stats"),
                   SizedBox(
-                    height: 10,
+                    height: MediaQueryData().size.height * 0.25,
+                    child: BargraphWidget(),
                   ),
                   GestureDetector(
                     child: Text("Block_Porn"),
