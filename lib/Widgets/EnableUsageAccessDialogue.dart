@@ -16,7 +16,8 @@ class EnableUsageAccessDialogue extends StatelessWidget {
         TextButton(
           child: Text('Grant Permission'),
           onPressed: () async {
-            await channel.invokeMethod('usage_stats_permission');
+            //usage stats permission is maintained in usage_stats class
+            //await channel.invokeMethod('usage_stats_permission');
           },
         ),
       ],

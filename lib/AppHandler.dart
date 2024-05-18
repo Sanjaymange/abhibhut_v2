@@ -52,7 +52,7 @@ class _AppHandlerState extends State<AppHandler> {
               if (isFirstRun == true) {
                 return FirstRun();
               } else {
-                return FutureBuilder<bool?>(
+                return HomeScreen(); /*FutureBuilder<bool?>(
                     future: check_usage_permission(context),
                     builder: (context, usagePermissionSnapshot) {
                       if (usagePermissionSnapshot.connectionState ==
@@ -73,6 +73,12 @@ class _AppHandlerState extends State<AppHandler> {
             } else {
               // this is like a temp placeholder , as
               return SizedBox();
+            }
+          */
+              }
+            } else {
+              // this is like a temp placeholder , as
+              return Text('loading app.....');
             }
           }),
       routes: {

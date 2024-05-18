@@ -5,12 +5,12 @@ class AppData {
   static List<AppData> all_apps = [];
 
   int? app_id;
-  late String package_nm;
-  late String app_label;
-  late bool blocked;
+  String package_nm;
+  String app_label;
+  bool blocked;
   int? start_time;
   int? end_time;
-  Future<Uint8List?> icon;
+  Future<Uint8List?>? icon;
 
   AppData(
       {this.app_id,
@@ -19,9 +19,9 @@ class AppData {
       required this.blocked,
       this.start_time,
       this.end_time,
-      required this.icon});
+      this.icon});
 
-  factory AppData.fromMap(Map<dynamic?, dynamic?> map, String Package_name) {
+  factory AppData.fromMap(Map<dynamic, dynamic> map, String Package_name) {
     return AppData(
         app_id: map["app_id"],
         package_nm: map["package_name"],
@@ -44,11 +44,12 @@ class AppData {
     }
   }
 
-  static Future<void> load_all_AppList() async {
+  static Future<List<AppData>> load_all_AppList() async {
     dynamic appdata =
         await MethodChannel('AppHandler/AppData').invokeMethod('AppList');
     await appdata.forEach((app) {
       all_apps.add(AppData.fromMap(app, app['package_name']));
     });
+    return all_apps;
   }
 }

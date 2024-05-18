@@ -14,10 +14,10 @@ class UsageStats {
   //int? weekly_blocked_times;
   //int? monthly_blocked_times;
   int? blocked_times;
-  
+
   String? tenure;
 
-  final DatabaseHelper db = DatabaseHelper();
+  DatabaseHelper db = DatabaseHelper();
 
   /*UsageStats({
     this.appId,
@@ -54,34 +54,33 @@ class UsageStats {
   }*/
 
   factory UsageStats.fromDB(Map<String, dynamic> json, String tenure) {
-  switch (tenure) {
-    case 'weekly': 
-    return UsageStats(
-      appId: json["app_id"],
-      Usage: json["weekly_usage"],
-      saved_hours: json["weekly_saved_hours"],
-      average_Usage: json["average_usage_weekly"],
-      blocked_times: json["weekly_blocked_times"],
-    );
-    case 'monthly': 
-    return UsageStats(
-      appId: json["app_id"],
-      Usage: json["monthly_usage"],
-      saved_hours: json["monthly_saved_hours"],
-      average_Usage: json["average_usage_monthly"],
-      blocked_times: json["monthly_blocked_times"],
-    );
-    default:
-    return UsageStats();
+    switch (tenure) {
+      case 'weekly':
+        return UsageStats(
+          appId: json["app_id"],
+          Usage: json["weekly_usage"],
+          saved_hours: json["weekly_saved_hours"],
+          average_Usage: json["average_usage_weekly"],
+          blocked_times: json["weekly_blocked_times"],
+        );
+      case 'monthly':
+        return UsageStats(
+          appId: json["app_id"],
+          Usage: json["monthly_usage"],
+          saved_hours: json["monthly_saved_hours"],
+          average_Usage: json["average_usage_monthly"],
+          blocked_times: json["monthly_blocked_times"],
+        );
+      default:
+        return UsageStats();
+    }
+    // Handle other cases if necessary
   }
-  // Handle other cases if necessary
-}
 
-    // Handle other tenures if needed
-  }
+  // Handle other tenures if needed
 
   /** We have different columns for Monthly , Weekly ; hence we are having all those attributes */
-  Future<List<UsageStats>> load_usage_stats([int? tenure]) async {
+  Future<List<Map<String, dynamic>>> load_usage_stats(String? tenure) async {
     List<UsageStats> usageStatsList = [];
     List<Map<String, dynamic>> data = [];
 
@@ -91,31 +90,20 @@ class UsageStats {
 
     // At night 3 am there will be a back_up stats to update total counts in the table for today's usage stats
     // same for monthly usage stats
-
-    if (tenure == 1) {
-      data = await db.queryData(
-          '''SELECT TOP 5 AD.PACKAGE_NM , WEEKLY_USGAE , WEEKLY_SAVED_HOURS , AVERAGE_USAGE_WEEKLY  FROM USAGE_STATS UTS 
-      INNER JOIN APP_DATA AD ON UTS.APP_ID = AD.APP_ID
-      ORDER BY WEEKLY_USGAE DESC''');
-    }
-    /* One week's usage stats */
-    if (tenure == 1) {
-      data = await db.queryData(
-          '''SELECT TOP 5 AD.PACKAGE_NM , WEEKLY_USGAE , WEEKLY_SAVED_HOURS , AVERAGE_USAGE_WEEKLY  FROM USAGE_STATS UTS 
-      INNER JOIN APP_DATA AD ON UTS.APP_ID = AD.APP_ID
-      ORDER BY WEEKLY_USGAE DESC''');
-    }
-
     /* One month Usage stats */
-    if (tenure == 2) {
+    if (tenure == 'monthly') {
       data = await db.queryData(
           '''SELECT TOP 5 AD.PACKAGE_NM , MONTHLY_USGAE , MONTHLY_SAVED_HOURS , AVERAGE_USAGE_MONTHLY  FROM USAGE_STATS UTS 
       INNER JOIN APP_DATA AD ON UTS.APP_ID = AD.APP_ID
       ORDER BY MONTHLY_USGAE DESC''');
     }
-
-    usageStatsList =
-        data.map((elements) => UsageStats.fromDB(elements)).toList();
-    return usageStatsList;
+    /**We are only preserving monthly and weekly , so if the tenure is not 'monthly' then it is by default weekly */
+    else {
+      data = await db.queryData(
+          '''SELECT TOP 5 AD.PACKAGE_NM , WEEKLY_USGAE , WEEKLY_SAVED_HOURS , AVERAGE_USAGE_WEEKLY  FROM USAGE_STATS UTS 
+      INNER JOIN APP_DATA AD ON UTS.APP_ID = AD.APP_ID
+      ORDER BY WEEKLY_USGAE DESC''');
+    }
+    return data;
   }
 }
