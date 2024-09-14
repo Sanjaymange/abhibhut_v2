@@ -1,12 +1,8 @@
-import 'package:abhibhut_v2/Screens/AppList.dart';
 import 'package:abhibhut_v2/Screens/NameInputPage.dart';
-import 'package:abhibhut_v2/utils/Routes.dart';
 import 'package:abhibhut_v2/utils/SqlHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
 
 class FirstRun extends StatefulWidget {
   const FirstRun({super.key});
