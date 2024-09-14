@@ -10,7 +10,7 @@ public class AppBlock extends Activity {
         // Disable the launch of the blocked app
         disableAppLaunch();
         // show a message to the user , change toast.length_long parameter to change time
-        Toast.makeText(this, "Distracting app usage blocked", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Distracting app usage blocked", Toast.LENGTH_LONG).show();
 
         /*Each app will have a shared preference created as com.abhibhut.label_name
         * this shared preference will have url and media type response metadata in it */

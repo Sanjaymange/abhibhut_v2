@@ -2,13 +2,13 @@ package com.abhibhut.Utils;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
-
-import com.domain_name.abhibhut.AppBlock;
+import android.os.Process;
 import com.domain_name.abhibhut.AppData;
 import com.domain_name.abhibhut.PornBlock;
 
@@ -35,10 +35,15 @@ public class AccessibilityUtil extends AccessibilityService {
          * packages as well , so we need to ensure that a browser is not being blocked unless it is tagged by the user
          * to block it */
 
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+        if( (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)||
+        (event.getEventType() == AccessibilityEvent.TYPE_WINDOWS_CHANGED)){
             Map<String , Object> blocked_pkgs = AppData.getBlockedPkgs(getApplicationContext());
+
+            /*Adding youtube as the default app as of now and placing any dummy value in object*/
+            blocked_pkgs.put("com.google.android.youtube",001);
             if(blocked_pkgs.containsKey(pkg_nm)) {
-                new AppBlock().blockAppUsage();
+                /*This method is implemented in AppBlock , but for testing purpose it was included here and below this code*/
+                disableAppLaunch();
             }
             if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
 
@@ -51,8 +56,10 @@ public class AccessibilityUtil extends AccessibilityService {
         }
     }
 
+
     /*Check in settings whether accessibility service is added or not*/
-    public static boolean isAccessibilityServiceEnabled(Context context, Class<?> accessibilityService) {
+    /* Commented is the older version , following would be the newer version */
+    /*public static boolean isAccessibilityServiceEnabled(Context context, Class<?> accessibilityService) {
         int accessibilityEnabled = 0;
         final String service = context.getPackageName() + "/" + accessibilityService.getName();
         try {
@@ -79,12 +86,37 @@ public class AccessibilityUtil extends AccessibilityService {
             }
         }
         return false;
+    }*/
+
+    //method to check whether the accessibility is enabled or not
+    public static boolean isAccessibilityServiceEnabled(Context context) {
+    AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+    int mode = AppOpsManager.MODE_ERRORED;
+
+        if (appOps != null) {
+        mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_WRITE_SETTINGS, Process.myUid(), context.getPackageName());
     }
 
-    // Open Accessibility settings page
-    public static void openAccessibilitySettings(Context context) {
-        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-        context.startActivity(intent);
+        if (mode == AppOpsManager.MODE_ALLOWED) {
+        Log.d("UTILS", "Accessibility permission is granted");
+        return true;
+    }
+
+        Log.d("UTILS", "Accessibility permission is not granted");
+        return false;
+}
+
+    /*Following function is for checking accessibility access*/
+    public static void grantAccessibilityPermission(Context context) {
+            try {
+                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } catch (Exception e) {
+                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            }
     }
 
     /*This function will add package names from accessibility service config*/
@@ -99,7 +131,6 @@ public class AccessibilityUtil extends AccessibilityService {
         info.packageNames = newPackageNames;
         setServiceInfo(info);
     }
-
     // Method to dynamically remove a package name from the service configuration
 
     public void removePackageNameDynamically(List<String> packageNames) {
@@ -132,4 +163,13 @@ public class AccessibilityUtil extends AccessibilityService {
          * AccessibilityUtil.java class . This should be only done for those
          * users who have apps which should be blocked */
     }
+
+    /*This method returns the user to home page*/
+    public void disableAppLaunch() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
 }

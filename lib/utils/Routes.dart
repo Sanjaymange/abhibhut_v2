@@ -4,4 +4,5 @@ class App_Routes {
   static const String HomeScreen = '/Screens/HomeScreen';
   static const String EnableUsageAccessDialogue =
       '/Widgets/EnableUsageAccessDialogue';
+  static const String PermissionsUI = '/Screens/PermissionsUI';
 }

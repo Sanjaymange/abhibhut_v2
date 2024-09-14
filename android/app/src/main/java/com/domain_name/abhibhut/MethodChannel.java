@@ -1,12 +1,16 @@
 package com.domain_name.abhibhut;
+import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.provider.Settings;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import com.abhibhut.Utils.AccessibilityUtil;
+import com.abhibhut.Utils.AppForegroundService;
 import com.abhibhut.Utils.BrowserUtils;
 
 import java.util.List;
@@ -31,15 +35,32 @@ public class MethodChannel extends FlutterActivity{
                                 List<Map<String, Object>> applist = AppData.InstalledAppList(getApplicationContext());
                                 result.success(applist);
                             }
+                            /*Check whether Foreground Service is running or not */
+                            if(call.method.equals("check_foreground_service")) {
+                                Boolean is_running = false;
+                                ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                                /*Iterate through all the services to check whether the foreground service is running or not*/
+                                for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                                    if (AppForegroundService.class.getName().equals(service.service.getClassName())) {
+                                        is_running = true;
+                                    }
+                                }
+                                if (!is_running) {
+                                    Intent serviceIntent = new Intent(this, AppForegroundService.class);
+                                    ContextCompat.startForegroundService(this, serviceIntent);
+                                }
+                            }
                             /*Check whether accessibility is enabled or not*/
                             if(call.method.equals("check_accessibility"))
                             {
-                                boolean allowed = AccessibilityUtil.isAccessibilityServiceEnabled(getApplicationContext(),AccessibilityUtil.class);
-                                result.success(allowed);
+                                Boolean access_bility_access = AccessibilityUtil.isAccessibilityServiceEnabled(getApplicationContext());
+                                result.success(access_bility_access);
                             }
-                            if(call.method.equals("open_accessibility_settings"))
+                            if(call.method.equals("grant_accessibility"))
                             {
-                                AccessibilityUtil.openAccessibilitySettings(getApplicationContext());
+                                //this method is a void method , however if you want to track
+                                //whether the service got enabled or not , then you can return a bool value
+                                AccessibilityUtil.grantAccessibilityPermission(getApplicationContext());
                             }
                             if(call.method.equals("enable_broswer_porn_lock"))
                             {
@@ -75,17 +96,6 @@ public class MethodChannel extends FlutterActivity{
                                 String pkg_nm = call.argument("package_nm");
                                 byte[] icon = AppData.get_icon(mgr,pkg_nm);
                                 result.success(icon);
-                            }
-                            if(call.method.equals("usage_stats_permission"))
-                            {
-                                Intent intent = new Intent(this, usage_access.class);
-                                try {
-                                    startActivity(intent);
-                                } catch (Exception e) {
-                                    // Handle the case where the activity couldn't be found
-                                    System.out.println(e.getMessage());
-                                    // Show a message to the user or provide an alternative option
-                                }
                             }
                         });
     }

@@ -8,6 +8,7 @@ import 'package:abhibhut_v2/utils/Porn_block_utils.dart';
 import 'package:abhibhut_v2/utils/Routes.dart';
 import 'package:flutter/material.dart';
 import 'package:usage_stats/usage_stats.dart';
+import 'package:abhibhut_v2/utils/Permissions.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,16 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
   String tenure = '';
   final device_height = MediaQueryData().size.height;
 
-  /* */
   @override
   void initState() {
-    UsageStats.checkUsagePermission().then((value) {
-      if (value != null && !value) {
-        UsageStats.grantUsagePermission();
-      }
-    });
-    loadData();
     super.initState();
+
+    loadData();
   }
 
   void loadData() async {
@@ -55,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-/**Below function will be used to get daily usage stats based on user's input*/
+  /**Below function will be used to get daily usage stats based on user's input*/
   Future<void> loadStats(String tenure, List<AppData> user_apps) async {
     Map<String, AppUsage> usageStats = {};
     if (tenure == 'daily') {
@@ -120,85 +116,86 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           title: Text("Abhibhut"),
         ),
-        body: all_apps_loaded
-            ? Center(
-                child: ListView(
-                children: [
-                  SizedBox(
-                      //height: device_height * 0.250,
-                      height: 250,
-                      child: usageStatsloaded
-                          ? FutureBuilder<List<AppUsage>>(
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return BargraphWidget(
-                                      tenure: tenure,
-                                      BarGrpupList: snapshot.data!);
-                                } else {
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                              },
-                              future: getTop5(appUsageStats),
-                            )
-                          : CircularProgressIndicator()),
-                  Text("Daily usage stats size box"),
-                  GestureDetector(
-                    child: Text("Block_Porn"),
-                    onTap: () async {
-                      bool premiumuser = await CommonUtils.IsPremiumUser();
-                      if (premiumuser) {
-                        bool accessibility_enabled =
-                            await CommonUtils.IsAccessibilityEnabled();
-                        if (accessibility_enabled) {
-                          //EnableAccessibilityDialogue();
+        body: Stack(children: [
+          all_apps_loaded
+              ? Center(
+                  child: ListView(
+                  children: [
+                    SizedBox(
+                        //height: device_height * 0.250,
+                        height: 250,
+                        child: usageStatsloaded
+                            ? FutureBuilder<List<AppUsage>>(
+                                future: getTop5(appUsageStats),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return BargraphWidget(
+                                        tenure: tenure,
+                                        BarGrpupList: snapshot.data!);
+                                  } else {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                })
+                            : CircularProgressIndicator()),
+                    Text("Daily usage stats size box"),
+                    GestureDetector(
+                      child: Text("Block_Porn"),
+                      onTap: () async {
+                        bool premiumuser = await CommonUtils.IsPremiumUser();
+                        if (premiumuser) {
+                          bool accessibility_enabled =
+                              await CommonUtils.IsAccessibilityEnabled();
+                          if (accessibility_enabled) {
+                            //EnableAccessibilityDialogue();
+                          } else {
+                            Porn_block_utils.porn_block();
+                          }
                         } else {
-                          Porn_block_utils.porn_block();
+                          EnablePremiumDialogue();
                         }
-                      } else {
-                        EnablePremiumDialogue();
-                      }
-                      /**Show timer or options of how long we want to keep it blocked */
+                        /**Show timer or options of how long we want to keep it blocked */
 
-                      /**Show timer or options of how long we want to keep it blocked */
-                    },
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  GestureDetector(
-                    child: Text("Block App"),
-                    /** check whether we can use async in ontap callback function */
-                    onTap: () async {
-                      bool premiumuser = await CommonUtils.IsPremiumUser();
-                      if (premiumuser) {
-                        bool accessibility_enabled =
-                            await CommonUtils.IsAccessibilityEnabled();
-                        if (accessibility_enabled) {
-                          //EnableAccessibilityDialogue();
+                        /**Show timer or options of how long we want to keep it blocked */
+                      },
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    GestureDetector(
+                      child: Text("Block App"),
+                      /** check whether we can use async in ontap callback function */
+                      onTap: () async {
+                        bool premiumuser = await CommonUtils.IsPremiumUser();
+                        if (premiumuser) {
+                          bool accessibility_enabled =
+                              await CommonUtils.IsAccessibilityEnabled();
+                          if (accessibility_enabled!) {
+                            //EnableAccessibilityDialogue();
+                          } else {
+                            AppBlockUtils().block_app(["com.android.youtube"]);
+                          }
                         } else {
-                          AppBlockUtils().block_app(["com.android.youtube"]);
+                          EnablePremiumDialogue();
                         }
-                      } else {
-                        EnablePremiumDialogue();
-                      }
-                      /**Show timer or options of how long we want to keep it blocked */
-                    },
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text("All Blocked Apps"),
-                  GestureDetector(
-                    child: Text("See All Apps"),
-                    /** check whether we can use async in ontap callback function */
-                    onTap: () {
-                      Navigator.pushNamed(context, App_Routes.AppList);
-                    },
-                  ),
-                ],
-              ))
-            : Center(child: Text('Hold on checking stats permission...')));
+                        /**Show timer or options of how long we want to keep it blocked */
+                      },
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text("All Blocked Apps"),
+                    GestureDetector(
+                      child: Text("See All Apps"),
+                      /** check whether we can use async in ontap callback function */
+                      onTap: () {
+                        Navigator.pushNamed(context, App_Routes.AppList);
+                      },
+                    ),
+                  ],
+                ))
+              : Center(child: Text('Hold on checking stats permission...'))
+        ]));
   }
 }

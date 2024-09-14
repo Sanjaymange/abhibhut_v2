@@ -1,3 +1,5 @@
+import 'package:abhibhut_v2/AppHandler.dart';
+import 'package:abhibhut_v2/Screens/PermissionsUI.dart';
 import 'package:abhibhut_v2/utils/user_profile_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,7 +44,10 @@ class NameInputPage extends StatelessWidget {
                   if (enteredName.trim().isNotEmpty) {
                     /* Adding username in shared preference */
                     User_profile_utils.set_user_name(enteredName);
-                    Navigator.pushNamed(context, App_Routes.HomeScreen);
+                    PermissionsUI(permissions: {
+                      'usage_permission': false,
+                      'accessibility_permission': false
+                    });
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Please enter your name.'),

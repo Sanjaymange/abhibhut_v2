@@ -1,8 +1,11 @@
 import 'package:abhibhut_v2/Screens/AppList.dart';
 import 'package:abhibhut_v2/Screens/First_run.dart';
 import 'package:abhibhut_v2/Screens/Home_Screen.dart';
+import 'package:abhibhut_v2/Screens/PermissionsUI.dart';
 import 'package:abhibhut_v2/Widgets/EnableUsageAccessDialogue.dart';
+import 'package:abhibhut_v2/utils/permissions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'utils/Routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:usage_stats/usage_stats.dart';
@@ -38,54 +41,57 @@ class _AppHandlerState extends State<AppHandler> {
   @override
   void initState() {
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized();
+  }
+
+  Future<Map<String, bool>> check_all_permissions() async {
+    Map<String, bool> permissions = {};
+    permissions['usage'] = await Permissions.check_usage_permission();
+    permissions['accessibility'] =
+        await Permissions.check_accessibility_permission();
+    return permissions;
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: FutureBuilder<bool>(
-          future: checkFirstRun(),
-          builder: (context, firstRunSnapshot) {
-            if (firstRunSnapshot.connectionState == ConnectionState.done) {
-              final isFirstRun = firstRunSnapshot.data;
-              if (isFirstRun == true) {
-                return FirstRun();
-              } else {
-                return HomeScreen(); /*FutureBuilder<bool?>(
-                    future: check_usage_permission(context),
-                    builder: (context, usagePermissionSnapshot) {
-                      if (usagePermissionSnapshot.connectionState ==
-                          ConnectionState.done) {
-                        final usageAccessible = usagePermissionSnapshot.data;
-                        if (usageAccessible == false) {
-                          return EnableUsageAccessDialogue();
-                        } else {
-                          return HomeScreen();
-                        }
-                      } else {
-                        // Second future still executing, return a placeholder or empty container
-                        return SizedBox();
-                      }
-                    });
-                //return HomeScreen();
-              }
+        future: checkFirstRun(),
+        builder: (context, firstRunSnapshot) {
+          if (firstRunSnapshot.connectionState == ConnectionState.done) {
+            final isFirstRun = firstRunSnapshot.data;
+            if (isFirstRun == true) {
+              return FirstRun(); // Your widget for the first run
             } else {
-              // this is like a temp placeholder , as
-              return SizedBox();
+              return FutureBuilder<Map<String, bool>>(
+                future: check_all_permissions(),
+                builder: (context, usagePermissionSnapshot) {
+                  if (usagePermissionSnapshot.connectionState ==
+                      ConnectionState.done) {
+                    final permissions = usagePermissionSnapshot.data;
+                    if (permissions!.containsValue(false)) {
+                      // Show dialog for missing permissions
+                      return PermissionsUI(
+                          permissions:
+                              permissions); // Your custom dialog or screen
+                    } else {
+                      return HomeScreen(); // If all permissions are granted
+                    }
+                  } else {
+                    // While waiting for the permissions to be checked
+                    return Image.asset('assets/Images/trial_image.jpg');
+                  }
+                },
+              );
             }
-          */
-              }
-            } else {
-              // this is like a temp placeholder , as
-              return Text('loading app.....');
-            }
-          }),
+          } else {
+            // While waiting for the first run check to complete
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
       routes: {
         App_Routes.AppList: (context) => AppList(),
-        App_Routes.HomeScreen: (context) => HomeScreen(),
-        App_Routes.EnableUsageAccessDialogue: (context) =>
-            EnableUsageAccessDialogue(),
+        App_Routes.HomeScreen: (context) => HomeScreen()
       },
     );
   }

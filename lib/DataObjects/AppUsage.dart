@@ -33,6 +33,7 @@ class AppUsage {
   static Future<Map<String, AppUsage>> aggregateData(
       List<EventUsageInfo> events, int startDate) async {
     List<int> approved_ids = [1, 2, 19, 20, 23];
+/*    ----------------------------------------------------------- */
     events.sort((a, b) => a.timeStamp!.compareTo(b.timeStamp!));
     print(
         'start_time = ${DateTime.fromMillisecondsSinceEpoch(int.parse(events[0].timeStamp!))}');
@@ -58,7 +59,7 @@ class AppUsage {
                 (int.parse(events[i + 1].timeStamp!) -
                     int.parse(events[i].timeStamp!));
 
-        /*  print('packageName : ${events[i].packageName}');
+        print('packageName : ${events[i].packageName}');
         print('eventType : ${events[i].eventType}');
         print(
             'timeStamp : ${DateTime.fromMillisecondsSinceEpoch(int.parse(events[i].timeStamp!))}');

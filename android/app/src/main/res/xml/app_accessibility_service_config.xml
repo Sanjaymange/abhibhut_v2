@@ -1,7 +1,9 @@
+<!-- youtube in packageNames is inserted for testing purpose , but it should be removed from there before deployment -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeViewTextChanged|typeWindowStateChanged"
+    android:accessibilityEventTypes="typeViewTextChanged|typeWindowStateChanged|typeWindowsChanged"
     android:accessibilityFlags="flagDefault"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:notificationTimeout="100"
     android:canRetrieveWindowContent="true"
+    android:packageNames="com.google.android.youtube"
     />
